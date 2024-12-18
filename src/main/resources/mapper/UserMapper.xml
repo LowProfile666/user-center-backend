@@ -17,7 +17,7 @@
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="deleteFlag" column="delete_flag" jdbcType="TINYINT"/>
-            <result property="role" column="role" jdbcType="TINYINT"/>
+            <result property="userRole" column="user_role" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -25,6 +25,6 @@
         avatar,gender,user_password,
         phone,email,user_status,
         create_time,update_time,delete_flag,
-        role
+        user_role
     </sql>
 </mapper>

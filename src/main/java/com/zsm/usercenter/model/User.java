@@ -1,12 +1,13 @@
 package com.zsm.usercenter.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用户表
@@ -14,6 +15,8 @@ import lombok.Data;
  */
 @TableName(value ="user")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements Serializable {
     /**
      * 自增主键
@@ -74,12 +77,13 @@ public class User implements Serializable {
     /**
      * 0 - 未删除，1 - 已删除（逻辑删除）
      */
+    @TableLogic
     private Integer deleteFlag;
 
     /**
      * 0 - 普通用户，1 - 管理员
      */
-    private Integer role;
+    private Integer userRole;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
