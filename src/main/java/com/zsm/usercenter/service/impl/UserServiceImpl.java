@@ -3,7 +3,9 @@ package com.zsm.usercenter.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsm.usercenter.constant.UserConstant;
+import com.zsm.usercenter.exception.BusinessException;
 import com.zsm.usercenter.model.User;
+import com.zsm.usercenter.model.response.CodeEnum;
 import com.zsm.usercenter.service.UserService;
 import com.zsm.usercenter.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,48 +27,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public Long register(String userAccount, String userPassword, String confirmPassword) {
-        if (StringUtils.isAllBlank(userAccount, userPassword, confirmPassword)) {
-            return -1L;
+        if (StringUtils.isAnyBlank(userAccount, userPassword, confirmPassword)) {
+            throw new BusinessException(CodeEnum.REGISTER_ERROR, "注册参数为空！");
         }
         if (userAccount.length() < 4 || userPassword.length() < 8 || confirmPassword.length() < 8) {
-            return -1L;
+            throw new BusinessException(CodeEnum.REGISTER_ERROR, "注册参数长度不合法！");
         }
         if (!userAccount.matches("^[a-zA-Z0-9]+$")) {
-            return -1L;
+            throw new BusinessException(CodeEnum.REGISTER_ERROR, "账户只能由数字、英文组成！");
         }
         if (!userPassword.equals(confirmPassword)) {
-            return -1L;
+            throw new BusinessException(CodeEnum.REGISTER_ERROR, "两次密码不一致！");
         }
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_account", userAccount);
         if (this.getOne(queryWrapper) != null) {
-            return -1L;
+            throw new BusinessException(CodeEnum.REGISTER_ERROR, "当前用户已存在！");
         }
 
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encrypt(userPassword));
 
-        return this.save(user) ? user.getId() : -1L;
+        if (!this.save(user))
+            throw new BusinessException(CodeEnum.REGISTER_ERROR);
+
+        return user.getId();
     }
 
     @Override
     public User login(String userAccount, String userPassword, HttpServletRequest request) {
-        if (StringUtils.isAllBlank(userAccount, userPassword)) {
-            return null;
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(CodeEnum.LOGIN_ERROR, "账户或密码不能为空！");
         }
         if (userAccount.length() < 4 || userPassword.length() < 8) {
-            return null;
+            throw new BusinessException(CodeEnum.LOGIN_ERROR, "账户或密码长度不合法！");
         }
         if (!userAccount.matches("^[a-zA-Z0-9]+$")) {
-            return null;
+            throw new BusinessException(CodeEnum.LOGIN_ERROR, "账户只能由数字、英文组成！");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_account", userAccount);
         queryWrapper.eq("user_password", encrypt(userPassword));
         User user = this.getOne(queryWrapper);
-        if (user == null) return null;
+        if (user == null) throw new BusinessException(CodeEnum.LOGIN_ERROR, "账户或密码错误");
 
         HttpSession session = request.getSession();
         User safetyUser = getSafetyUser(user);
@@ -120,7 +125,3 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return hexPassword.toString();
     }
 }
-
-
-
-

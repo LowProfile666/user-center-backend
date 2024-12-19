@@ -7,6 +7,9 @@ spring:
     password: 1234
   session:
     timeout: 86400
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
 server:
   port: 8080
   servlet:
